@@ -1198,6 +1198,88 @@ Instruction *InstCombinerImpl::foldSignBitTest(ICmpInst &I) {
                           X, ConstantInt::getNullValue(XTy));
 }
 
+/// Handles:
+///   icmp eq/ne (add select((icmp slt/sgt/ult/ugt X, C1), C2, C3), X), 0
+///   icmp eq/ne (add X, select((icmp slt/sgt/ult/ugt X, C1), C2, C3)), 0
+///
+/// Fold into:
+///   eq : (X == -C2) || (X == -C3)
+///   ne : (X != -C2) && (X != -C3)
+///
+/// Caller guarantees: RHS of icmp is zero.
+static Instruction *foldICmpAddSelectZero(ICmpInst &Cmp, InstCombinerImpl &IC) {
+  
+  CmpPredicate Pred = Cmp.getPredicate();
+  if (!ICmpInst::isEquality(Pred))
+    return nullptr;
+  Value *A;
+  const APInt *C1, *C2, *C3;
+  CmpPredicate P;
+
+  // Match:
+  // add (select (icmp X, C1), C2, C3), X
+  // or commuted form
+  if (!match(Cmp.getOperand(0),
+             m_OneUse(m_c_Add(
+              m_OneUse(m_Select(
+                m_ICmp(P, m_Value(A), m_APInt(C1)), m_APInt(C2),
+                m_APInt(C3))),
+              m_Deferred(A)))))
+    return nullptr;  
+
+  APInt LH = -(*C2);
+  APInt RH = -(*C3);
+
+  // Verify that LH and RH fall into the correct partition defined by C1.
+  // For slt: LH <s C1 <=s RH
+  // For sgt: LH >s C1 >=s RH
+  // For ult: LH <u C1 <=u RH
+  // For ugt: LH >u C1 >=u RH
+  // (sle/sge/ule/uge are canonicalized to slt/sgt/ult/ugt before reaching here)
+
+  switch (P) {
+  case ICmpInst::ICMP_SLT:
+    // LH < C1 <= RH
+    if (!LH.slt(*C1) || !C1->sle(RH))
+      return nullptr;
+    break;
+  case ICmpInst::ICMP_SGT:
+    // LH > C1 >= RH
+    if (!LH.sgt(*C1) || !C1->sge(RH))
+      return nullptr;
+    break;
+  case ICmpInst::ICMP_ULT:
+    // LH <u C1 <=u RH
+    if (!LH.ult(*C1) || !C1->ule(RH))
+        return nullptr;
+    break;
+  case ICmpInst::ICMP_UGT:
+    // LH >u C1 >=u RH
+    if (!LH.ugt(*C1) || !C1->uge(RH))
+        return nullptr;
+    break;
+  default:
+    return nullptr;
+  }
+
+  InstCombiner::BuilderTy &Builder = IC.Builder;
+  Type *Ty = A->getType();
+
+  // eq → (X == LH) || (X == RH)
+  // ne → (X != LH) && (X != RH)
+  if (Pred == ICmpInst::ICMP_EQ) {
+    Value *CmpA = Builder.CreateICmpEQ(A, ConstantInt::get(Ty, LH));
+    Value *CmpB = Builder.CreateICmpEQ(A, ConstantInt::get(Ty, RH));
+
+    return BinaryOperator::CreateOr(CmpA, CmpB);
+  }
+
+  Value *CmpA = Builder.CreateICmpNE(A, ConstantInt::get(Ty, LH));
+  Value *CmpB = Builder.CreateICmpNE(A, ConstantInt::get(Ty, RH));
+
+  return BinaryOperator::CreateAnd(CmpA, CmpB);
+}
+
 // Handle  icmp pred X, 0
 Instruction *InstCombinerImpl::foldICmpWithZero(ICmpInst &Cmp) {
   CmpInst::Predicate Pred = Cmp.getPredicate();
@@ -1214,6 +1296,9 @@ Instruction *InstCombinerImpl::foldICmpWithZero(ICmpInst &Cmp) {
         return new ICmpInst(Pred, A, Cmp.getOperand(1));
     }
   }
+
+  if (Instruction *New = foldICmpAddSelectZero(Cmp, *this))
+    return New;
 
   if (Instruction *New = foldIRemByPowerOfTwoToBitTest(Cmp))
     return New;
