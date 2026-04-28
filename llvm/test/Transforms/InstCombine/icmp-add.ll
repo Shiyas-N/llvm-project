@@ -3602,3 +3602,939 @@ entry:
   %result = select i1 %eq, i1 %v1_lt_v3, i1 %less_than
   ret i1 %result
 }
+
+; PR 167079
+
+define i1 @icmp_add_select_slt_eq(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_slt_eq(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 10
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+define i1 @icmp_add_select_slt_ne(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_slt_ne(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp ne i32 [[X:%.*]], 10
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp ne i32 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = and i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp ne i32 %add, 0
+  ret i1 %cmp
+}
+
+define i1 @icmp_add_select_sgt_eq(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_sgt_eq(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 20
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 10
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp sgt i32 %x, 15
+  %sel = select i1 %cond, i32 -20, i32 -10
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+define i1 @icmp_add_select_sgt_ne(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_sgt_ne(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp ne i32 [[X:%.*]], 20
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp ne i32 [[X]], 10
+; CHECK-NEXT:    [[CMP:%.*]] = and i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp sgt i32 %x, 15
+  %sel = select i1 %cond, i32 -20, i32 -10
+  %add = add i32 %sel, %x
+  %cmp = icmp ne i32 %add, 0
+  ret i1 %cmp
+}
+
+define i1 @icmp_add_select_ult_eq(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_ult_eq(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 10
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ult i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+define i1 @icmp_add_select_ult_ne(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_ult_ne(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp ne i32 [[X:%.*]], 10
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp ne i32 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = and i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ult i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp ne i32 %add, 0
+  ret i1 %cmp
+}
+
+define i1 @icmp_add_select_ugt_eq(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_ugt_eq(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 20
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 10
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ugt i32 %x, 15
+  %sel = select i1 %cond, i32 -20, i32 -10
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+define i1 @icmp_add_select_ugt_ne(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_ugt_ne(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp ne i32 [[X:%.*]], 20
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp ne i32 [[X]], 10
+; CHECK-NEXT:    [[CMP:%.*]] = and i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ugt i32 %x, 15
+  %sel = select i1 %cond, i32 -20, i32 -10
+  %add = add i32 %sel, %x
+  %cmp = icmp ne i32 %add, 0
+  ret i1 %cmp
+}
+
+; Commuted forms
+
+; commuted add operands (tests m_c_Add)
+define i1 @icmp_add_select_slt_eq_commute(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_slt_eq_commute(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 10
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %x, %sel
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+define i1 @icmp_add_select_slt_ne_commute(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_slt_ne_commute(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp ne i32 [[X:%.*]], 10
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp ne i32 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = and i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %x, %sel
+  %cmp = icmp ne i32 %add, 0
+  ret i1 %cmp
+}
+
+define i1 @icmp_add_select_sgt_eq_commute(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_sgt_eq_commute(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 20
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 10
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp sgt i32 %x, 15
+  %sel = select i1 %cond, i32 -20, i32 -10
+  %add = add i32 %x, %sel
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+define i1 @icmp_add_select_ult_eq_commute(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_ult_eq_commute(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 10
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ult i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %x, %sel
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+define i1 @icmp_add_select_ugt_eq_commute(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_ugt_eq_commute(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 20
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 10
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ugt i32 %x, 15
+  %sel = select i1 %cond, i32 -20, i32 -10
+  %add = add i32 %x, %sel
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; Type coverage
+
+; i64 type - ensure no implicit i32 assumption
+define i1 @icmp_add_select_slt_eq_i64(i64 %x) {
+; CHECK-LABEL: @icmp_add_select_slt_eq_i64(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i64 [[X:%.*]], 10
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i64 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i64 %x, 15
+  %sel = select i1 %cond, i64 -10, i64 -20
+  %add = add i64 %sel, %x
+  %cmp = icmp eq i64 %add, 0
+  ret i1 %cmp
+}
+
+; vector variants - splat constants fold the same way as scalars
+
+define <2 x i1> @icmp_add_select_slt_eq_vec(<2 x i32> %x) {
+; CHECK-LABEL: @icmp_add_select_slt_eq_vec(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq <2 x i32> [[X:%.*]], splat (i32 10)
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq <2 x i32> [[X]], splat (i32 20)
+; CHECK-NEXT:    [[CMP:%.*]] = or <2 x i1> [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret <2 x i1> [[CMP]]
+;
+  %cond = icmp slt <2 x i32> %x, splat (i32 15)
+  %sel = select <2 x i1> %cond, <2 x i32> splat (i32 -10), <2 x i32> splat (i32 -20)
+  %add = add <2 x i32> %sel, %x
+  %cmp = icmp eq <2 x i32> %add, zeroinitializer
+  ret <2 x i1> %cmp
+}
+
+define <2 x i1> @icmp_add_select_slt_ne_vec(<2 x i32> %x) {
+; CHECK-LABEL: @icmp_add_select_slt_ne_vec(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp ne <2 x i32> [[X:%.*]], splat (i32 10)
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp ne <2 x i32> [[X]], splat (i32 20)
+; CHECK-NEXT:    [[CMP:%.*]] = and <2 x i1> [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret <2 x i1> [[CMP]]
+;
+  %cond = icmp slt <2 x i32> %x, splat (i32 15)
+  %sel = select <2 x i1> %cond, <2 x i32> splat (i32 -10), <2 x i32> splat (i32 -20)
+  %add = add <2 x i32> %sel, %x
+  %cmp = icmp ne <2 x i32> %add, zeroinitializer
+  ret <2 x i1> %cmp
+}
+
+define <2 x i1> @icmp_add_select_sgt_eq_vec(<2 x i32> %x) {
+; CHECK-LABEL: @icmp_add_select_sgt_eq_vec(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq <2 x i32> [[X:%.*]], splat (i32 20)
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq <2 x i32> [[X]], splat (i32 10)
+; CHECK-NEXT:    [[CMP:%.*]] = or <2 x i1> [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret <2 x i1> [[CMP]]
+;
+  %cond = icmp sgt <2 x i32> %x, splat (i32 15)
+  %sel = select <2 x i1> %cond, <2 x i32> splat (i32 -20), <2 x i32> splat (i32 -10)
+  %add = add <2 x i32> %sel, %x
+  %cmp = icmp eq <2 x i32> %add, zeroinitializer
+  ret <2 x i1> %cmp
+}
+
+define <2 x i1> @icmp_add_select_ult_eq_vec(<2 x i32> %x) {
+; CHECK-LABEL: @icmp_add_select_ult_eq_vec(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq <2 x i32> [[X:%.*]], splat (i32 10)
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq <2 x i32> [[X]], splat (i32 20)
+; CHECK-NEXT:    [[CMP:%.*]] = or <2 x i1> [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret <2 x i1> [[CMP]]
+;
+  %cond = icmp ult <2 x i32> %x, splat (i32 15)
+  %sel = select <2 x i1> %cond, <2 x i32> splat (i32 -10), <2 x i32> splat (i32 -20)
+  %add = add <2 x i32> %sel, %x
+  %cmp = icmp eq <2 x i32> %add, zeroinitializer
+  ret <2 x i1> %cmp
+}
+
+define <2 x i1> @icmp_add_select_ugt_eq_vec(<2 x i32> %x) {
+; CHECK-LABEL: @icmp_add_select_ugt_eq_vec(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq <2 x i32> [[X:%.*]], splat (i32 20)
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq <2 x i32> [[X]], splat (i32 10)
+; CHECK-NEXT:    [[CMP:%.*]] = or <2 x i1> [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret <2 x i1> [[CMP]]
+;
+  %cond = icmp ugt <2 x i32> %x, splat (i32 15)
+  %sel = select <2 x i1> %cond, <2 x i32> splat (i32 -20), <2 x i32> splat (i32 -10)
+  %add = add <2 x i32> %sel, %x
+  %cmp = icmp eq <2 x i32> %add, zeroinitializer
+  ret <2 x i1> %cmp
+}
+
+; commuted add with vector
+define <2 x i1> @icmp_add_select_slt_eq_vec_commute(<2 x i32> %x) {
+; CHECK-LABEL: @icmp_add_select_slt_eq_vec_commute(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq <2 x i32> [[X:%.*]], splat (i32 10)
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq <2 x i32> [[X]], splat (i32 20)
+; CHECK-NEXT:    [[CMP:%.*]] = or <2 x i1> [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret <2 x i1> [[CMP]]
+;
+  %cond = icmp slt <2 x i32> %x, splat (i32 15)
+  %sel = select <2 x i1> %cond, <2 x i32> splat (i32 -10), <2 x i32> splat (i32 -20)
+  %add = add <2 x i32> %x, %sel
+  %cmp = icmp eq <2 x i32> %add, zeroinitializer
+  ret <2 x i1> %cmp
+}
+
+; i8 type variants
+
+define i1 @icmp_add_select_slt_eq_i8(i8 %x) {
+; CHECK-LABEL: @icmp_add_select_slt_eq_i8(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i8 [[X:%.*]], 10
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i8 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i8 %x, 15
+  %sel = select i1 %cond, i8 -10, i8 -20
+  %add = add i8 %sel, %x
+  %cmp = icmp eq i8 %add, 0
+  ret i1 %cmp
+}
+
+define i1 @icmp_add_select_ult_eq_i8(i8 %x) {
+; CHECK-LABEL: @icmp_add_select_ult_eq_i8(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i8 [[X:%.*]], 10
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i8 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ult i8 %x, 15
+  %sel = select i1 %cond, i8 -10, i8 -20
+  %add = add i8 %sel, %x
+  %cmp = icmp eq i8 %add, 0
+  ret i1 %cmp
+}
+
+; Positive boundary cases
+
+; slt: CondC equals one root; strict comparison still partitions roots correctly
+define i1 @icmp_add_select_slt_eq_cond_at_root(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_slt_eq_cond_at_root(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 10
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 20
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; slt: INT_MIN edge case — negation wraps, must remain correct and not crash
+define i1 @icmp_add_select_slt_eq_intmin_root(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_slt_eq_intmin_root(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], -2147483648
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 1
+  %sel = select i1 %cond, i32 -2147483648, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; sgt: CondC equals one root; strict comparison still partitions roots correctly
+define i1 @icmp_add_select_sgt_eq_cond_at_root(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_sgt_eq_cond_at_root(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 20
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 10
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp sgt i32 %x, 10
+  %sel = select i1 %cond, i32 -20, i32 -10
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; ult: CondC equals one root; strict comparison still partitions roots correctly
+define i1 @icmp_add_select_ult_eq_cond_at_root(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_ult_eq_cond_at_root(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 10
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ult i32 %x, 20
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; ugt: CondC equals one root; strict comparison still partitions roots correctly
+define i1 @icmp_add_select_ugt_eq_cond_at_root(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_ugt_eq_cond_at_root(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 20
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 10
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ugt i32 %x, 10
+  %sel = select i1 %cond, i32 -20, i32 -10
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+
+; Negative tests
+
+; outer icmp is not eq/ne
+define i1 @icmp_add_select_neg_outer_not_equality(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_outer_not_equality(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt i32 [[X:%.*]], 15
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -10, i32 -20
+; CHECK-NEXT:    [[ADD:%.*]] = add i32 [[SEL]], [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp slt i32 [[ADD]], 0
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp slt i32 %add, 0
+  ret i1 %cmp
+}
+
+; rhs of outer icmp is not zero
+define i1 @icmp_add_select_neg_rhs_nonzero(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_rhs_nonzero(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt i32 [[X:%.*]], 15
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -10, i32 -20
+; CHECK-NEXT:    [[ADD:%.*]] = add i32 [[SEL]], [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[ADD]], 1
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 1
+  ret i1 %cmp
+}
+
+; inner icmp uses eq - not handled by the switch, falls to default
+define i1 @icmp_add_select_neg_inner_eq(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_inner_eq(
+; CHECK-NEXT:    [[COND:%.*]] = icmp eq i32 [[X:%.*]], 15
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -10, i32 -20
+; CHECK-NEXT:    [[ADD:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp eq i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; inner icmp uses ne - not handled by the switch, falls to default
+define i1 @icmp_add_select_neg_inner_ne(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_inner_ne(
+; CHECK-NEXT:    [[COND_NOT:%.*]] = icmp eq i32 [[X:%.*]], 15
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND_NOT]], i32 -20, i32 -10
+; CHECK-NEXT:    [[ADD:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ne i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; x in add and x in icmp are different SSA values - m_Deferred fails
+define i1 @icmp_add_select_neg_different_vars(i32 %x, i32 %y) {
+; CHECK-LABEL: @icmp_add_select_neg_different_vars(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt i32 [[X:%.*]], 15
+; CHECK-NEXT:    [[SEL_NEG:%.*]] = select i1 [[COND]], i32 10, i32 20
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[Y:%.*]], [[SEL_NEG]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %y, %sel
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; Negative boundary cases
+
+; slt: CondC equals TrueRoot → strict comparison fails (no valid partition)
+define i1 @icmp_add_select_neg_slt_cond_eq_trueroot(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_slt_cond_eq_trueroot(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt i32 [[X:%.*]], 10
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -10, i32 -20
+; CHECK-NEXT:    [[ADD:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 10
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; slt: CondC above both roots → both roots satisfy predicate, partition fails
+define i1 @icmp_add_select_neg_slt_cond_above_roots(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_slt_cond_above_roots(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt i32 [[X:%.*]], 21
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -10, i32 -20
+; CHECK-NEXT:    [[ADD:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 21
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; slt: FalseRoot equals INT_MIN → negation wraps, partition check fails
+define i1 @icmp_add_select_neg_slt_intmin_root(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_slt_intmin_root(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt i32 [[X:%.*]], 15
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -10, i32 -2147483648
+; CHECK-NEXT:    [[ADD:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -2147483648
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; sgt: CondC equals TrueRoot → strict comparison fails
+define i1 @icmp_add_select_neg_sgt_cond_eq_trueroot(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_sgt_cond_eq_trueroot(
+; CHECK-NEXT:    [[COND:%.*]] = icmp sgt i32 [[X:%.*]], 20
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -20, i32 -10
+; CHECK-NEXT:    [[ADD:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp sgt i32 %x, 20
+  %sel = select i1 %cond, i32 -20, i32 -10
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; sgt: roots do not partition correctly (both may fail/hold)
+define i1 @icmp_add_select_neg_sgt_bad_partition(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_sgt_bad_partition(
+; CHECK-NEXT:    [[COND:%.*]] = icmp sgt i32 [[X:%.*]], 15
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -20, i32 -16
+; CHECK-NEXT:    [[ADD:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp sgt i32 %x, 15
+  %sel = select i1 %cond, i32 -20, i32 -16
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; ult: CondC equals TrueRoot → strict comparison fails
+define i1 @icmp_add_select_neg_ult_cond_eq_trueroot(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_ult_cond_eq_trueroot(
+; CHECK-NEXT:    [[COND:%.*]] = icmp ult i32 [[X:%.*]], 10
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -10, i32 -20
+; CHECK-NEXT:    [[ADD:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ult i32 %x, 10
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; ult: CondC above both roots → partition fails
+define i1 @icmp_add_select_neg_ult_cond_above_roots(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_ult_cond_above_roots(
+; CHECK-NEXT:    [[COND:%.*]] = icmp ult i32 [[X:%.*]], 21
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -10, i32 -20
+; CHECK-NEXT:    [[ADD:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ult i32 %x, 21
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; ugt: CondC equals TrueRoot → strict comparison fails
+define i1 @icmp_add_select_neg_ugt_cond_eq_trueroot(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_ugt_cond_eq_trueroot(
+; CHECK-NEXT:    [[COND:%.*]] = icmp ugt i32 [[X:%.*]], 20
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -20, i32 -10
+; CHECK-NEXT:    [[ADD:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ugt i32 %x, 20
+  %sel = select i1 %cond, i32 -20, i32 -10
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; ugt: roots do not partition correctly
+define i1 @icmp_add_select_neg_ugt_bad_partition(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_ugt_bad_partition(
+; CHECK-NEXT:    [[COND:%.*]] = icmp ugt i32 [[X:%.*]], 15
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -20, i32 -16
+; CHECK-NEXT:    [[ADD:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ugt i32 %x, 15
+  %sel = select i1 %cond, i32 -20, i32 -16
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+
+; add result has multiple uses - m_OneUse(m_c_Add(...)) fails
+define i1 @icmp_add_select_neg_add_multiuse(i32 %x, ptr %p) {
+; CHECK-LABEL: @icmp_add_select_neg_add_multiuse(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt i32 [[X:%.*]], 15
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -10, i32 -20
+; CHECK-NEXT:    [[ADD:%.*]] = add i32 [[SEL]], [[X]]
+; CHECK-NEXT:    store i32 [[ADD]], ptr [[P:%.*]], align 4
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[ADD]], 0
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  store i32 %add, ptr %p
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; select result has multiple uses - m_OneUse(m_Select(...)) fails
+define i32 @icmp_add_select_neg_select_multiuse(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_neg_select_multiuse(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt i32 [[X:%.*]], 15
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -10, i32 -20
+; CHECK-NEXT:    [[ADD:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[ADD]]
+; CHECK-NEXT:    [[RET:%.*]] = select i1 [[CMP]], i32 [[SEL]], i32 0
+; CHECK-NEXT:    ret i32 [[RET]]
+;
+  %cond = icmp slt i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  %ret = select i1 %cmp, i32 %sel, i32 0
+  ret i32 %ret
+}
+
+; nsw flag does not inhibit this fold.
+; With 'nuw', the add cannot wrap in unsigned arithmetic, so the equality
+; with zero is folded to false by separate InstCombine reasoning.
+
+define i1 @icmp_add_select_slt_eq_nsw(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_slt_eq_nsw(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 10
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 20
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 15
+  %sel = select i1 %cond, i32 -10, i32 -20
+  %add = add nsw i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+
+; negative vector tests
+
+; non-splat C2: m_APInt requires uniform vector, no fold
+define <2 x i1> @icmp_add_select_neg_nonsplat_c2(<2 x i32> %x) {
+; CHECK-LABEL: @icmp_add_select_neg_nonsplat_c2(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt <2 x i32> [[X:%.*]], splat (i32 15)
+; CHECK-NEXT:    [[SEL:%.*]] = select <2 x i1> [[COND]], <2 x i32> <i32 -10, i32 -11>, <2 x i32> splat (i32 -20)
+; CHECK-NEXT:    [[ADD:%.*]] = sub <2 x i32> zeroinitializer, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq <2 x i32> [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret <2 x i1> [[CMP]]
+;
+  %cond = icmp slt <2 x i32> %x, splat (i32 15)
+  %sel = select <2 x i1> %cond, <2 x i32> <i32 -10, i32 -11>, <2 x i32> splat (i32 -20)
+  %add = add <2 x i32> %sel, %x
+  %cmp = icmp eq <2 x i32> %add, zeroinitializer
+  ret <2 x i1> %cmp
+}
+
+; non-splat C3: m_APInt requires uniform vector, no fold
+define <2 x i1> @icmp_add_select_neg_nonsplat_c3(<2 x i32> %x) {
+; CHECK-LABEL: @icmp_add_select_neg_nonsplat_c3(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt <2 x i32> [[X:%.*]], splat (i32 15)
+; CHECK-NEXT:    [[SEL:%.*]] = select <2 x i1> [[COND]], <2 x i32> splat (i32 -10), <2 x i32> <i32 -20, i32 -21>
+; CHECK-NEXT:    [[ADD:%.*]] = sub <2 x i32> zeroinitializer, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq <2 x i32> [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret <2 x i1> [[CMP]]
+;
+  %cond = icmp slt <2 x i32> %x, splat (i32 15)
+  %sel = select <2 x i1> %cond, <2 x i32> splat (i32 -10), <2 x i32> <i32 -20, i32 -21>
+  %add = add <2 x i32> %sel, %x
+  %cmp = icmp eq <2 x i32> %add, zeroinitializer
+  ret <2 x i1> %cmp
+}
+
+; non-splat C1: m_APInt on the inner icmp requires uniform vector, no fold
+define <2 x i1> @icmp_add_select_neg_nonsplat_c1(<2 x i32> %x) {
+; CHECK-LABEL: @icmp_add_select_neg_nonsplat_c1(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt <2 x i32> [[X:%.*]], <i32 15, i32 16>
+; CHECK-NEXT:    [[SEL:%.*]] = select <2 x i1> [[COND]], <2 x i32> splat (i32 -10), <2 x i32> splat (i32 -20)
+; CHECK-NEXT:    [[ADD:%.*]] = sub <2 x i32> zeroinitializer, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq <2 x i32> [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret <2 x i1> [[CMP]]
+;
+  %cond = icmp slt <2 x i32> %x, <i32 15, i32 16>
+  %sel = select <2 x i1> %cond, <2 x i32> splat (i32 -10), <2 x i32> splat (i32 -20)
+  %add = add <2 x i32> %sel, %x
+  %cmp = icmp eq <2 x i32> %add, zeroinitializer
+  ret <2 x i1> %cmp
+}
+
+; Tests for issue #167079
+; Pattern: sub(x, select(icmp Pred x, C, A, B)) == 0
+; Canonicalized to: add(x, select(icmp Pred x, C, -A, -B)) == 0
+; Fold applies when CondC partitions the two roots.
+
+; original sub form — canonicalized to add, then folded
+define i1 @icmp_sub_select_slt_eq(i32 %x) {
+; CHECK-LABEL: @icmp_sub_select_slt_eq(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], -1
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 1
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 1
+  %sel = select i1 %cond, i32 -1, i32 1
+  %sub = sub i32 %x, %sel
+  %cmp = icmp eq i32 %sub, 0
+  ret i1 %cmp
+}
+
+; ne variant of the same pattern
+define i1 @icmp_sub_select_slt_ne(i32 %x) {
+; CHECK-LABEL: @icmp_sub_select_slt_ne(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp ne i32 [[X:%.*]], -1
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp ne i32 [[X]], 1
+; CHECK-NEXT:    [[CMP:%.*]] = and i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 1
+  %sel = select i1 %cond, i32 -1, i32 1
+  %sub = sub i32 %x, %sel
+  %cmp = icmp ne i32 %sub, 0
+  ret i1 %cmp
+}
+
+; commuted sub operands are not equivalent → no canonicalization → no fold
+define i1 @icmp_sub_select_slt_eq_wrong_order_no_fold(i32 %x) {
+; CHECK-LABEL: @icmp_sub_select_slt_eq_wrong_order_no_fold(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt i32 [[X:%.*]], 1
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 -1, i32 1
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[X]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 1
+  %sel = select i1 %cond, i32 -1, i32 1
+  %sub = sub i32 %sel, %x
+  %cmp = icmp eq i32 %sub, 0
+  ret i1 %cmp
+}
+
+; canonical add form produced from sub
+define i1 @icmp_add_select_slt_eq_from_sub_canonical(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_slt_eq_from_sub_canonical(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], -1
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], 1
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 1
+  %sel = select i1 %cond, i32 1, i32 -1
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; sgt variant — same partitioning logic, different arm layout
+define i1 @icmp_sub_select_sgt_eq(i32 %x) {
+; CHECK-LABEL: @icmp_sub_select_sgt_eq(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i32 [[X:%.*]], 1
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i32 [[X]], -1
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp sgt i32 %x, -1
+  %sel = select i1 %cond, i32 1, i32 -1
+  %sub = sub i32 %x, %sel
+  %cmp = icmp eq i32 %sub, 0
+  ret i1 %cmp
+}
+
+; ult variant — canonicalization changes form, still must not misfold
+define i1 @icmp_sub_select_ult_eq(i32 %x) {
+; CHECK-LABEL: @icmp_sub_select_ult_eq(
+; CHECK-NEXT:    [[COND:%.*]] = icmp eq i32 [[X:%.*]], 0
+; CHECK-NEXT:    [[SEL_NEG:%.*]] = select i1 [[COND]], i32 1, i32 -1
+; CHECK-NEXT:    [[SUB:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL_NEG]], [[SUB]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ult i32 %x, 1
+  %sel = select i1 %cond, i32 -1, i32 1
+  %sub = sub i32 %x, %sel
+  %cmp = icmp eq i32 %sub, 0
+  ret i1 %cmp
+}
+
+; ugt variant — canonicalization changes form, still must not misfold
+define i1 @icmp_sub_select_ugt_eq(i32 %x) {
+; CHECK-LABEL: @icmp_sub_select_ugt_eq(
+; CHECK-NEXT:    [[COND_NOT:%.*]] = icmp eq i32 [[X:%.*]], 0
+; CHECK-NEXT:    [[SEL_NEG:%.*]] = select i1 [[COND_NOT]], i32 1, i32 -1
+; CHECK-NEXT:    [[SUB:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL_NEG]], [[SUB]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp ugt i32 %x, 0
+  %sel = select i1 %cond, i32 1, i32 -1
+  %sub = sub i32 %x, %sel
+  %cmp = icmp eq i32 %sub, 0
+  ret i1 %cmp
+}
+
+; i64 variant — ensure no type assumptions
+define i1 @icmp_sub_select_slt_eq_i64(i64 %x) {
+; CHECK-LABEL: @icmp_sub_select_slt_eq_i64(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq i64 [[X:%.*]], -1
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq i64 [[X]], 1
+; CHECK-NEXT:    [[CMP:%.*]] = or i1 [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i64 %x, 1
+  %sel = select i1 %cond, i64 -1, i64 1
+  %sub = sub i64 %x, %sel
+  %cmp = icmp eq i64 %sub, 0
+  ret i1 %cmp
+}
+
+; vector variant
+define <2 x i1> @icmp_sub_select_slt_eq_vec(<2 x i32> %x) {
+; CHECK-LABEL: @icmp_sub_select_slt_eq_vec(
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq <2 x i32> [[X:%.*]], splat (i32 -1)
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp eq <2 x i32> [[X]], splat (i32 1)
+; CHECK-NEXT:    [[CMP:%.*]] = or <2 x i1> [[TMP1]], [[TMP2]]
+; CHECK-NEXT:    ret <2 x i1> [[CMP]]
+;
+  %cond = icmp slt <2 x i32> %x, splat (i32 1)
+  %sel = select <2 x i1> %cond, <2 x i32> splat (i32 -1), <2 x i32> splat (i32 1)
+  %sub = sub <2 x i32> %x, %sel
+  %cmp = icmp eq <2 x i32> %sub, zeroinitializer
+  ret <2 x i1> %cmp
+}
+
+; multiple uses prevent fold (OneUse guard)
+define i1 @icmp_sub_select_slt_eq_multiuse(i32 %x, ptr %p) {
+; CHECK-LABEL: @icmp_sub_select_slt_eq_multiuse(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt i32 [[X:%.*]], 1
+; CHECK-NEXT:    [[SEL_NEG:%.*]] = select i1 [[COND]], i32 1, i32 -1
+; CHECK-NEXT:    [[SUB:%.*]] = add i32 [[SEL_NEG]], [[X]]
+; CHECK-NEXT:    store i32 [[SUB]], ptr [[P:%.*]], align 4
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SUB]], 0
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 1
+  %sel = select i1 %cond, i32 -1, i32 1
+  %sub = sub i32 %x, %sel
+  store i32 %sub, ptr %p
+  %cmp = icmp eq i32 %sub, 0
+  ret i1 %cmp
+}
+
+; negative: partition fails after canonicalization → no fold
+define i1 @icmp_sub_select_slt_no_fold_bad_partition(i32 %x) {
+; CHECK-LABEL: @icmp_sub_select_slt_no_fold_bad_partition(
+; CHECK-NEXT:    [[COND:%.*]] = icmp slt i32 [[X:%.*]], 10
+; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[COND]], i32 5, i32 -1
+; CHECK-NEXT:    [[ADD:%.*]] = sub i32 0, [[X]]
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[SEL]], [[ADD]]
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 10
+  %sel = select i1 %cond, i32 -5, i32 1
+  %sub = sub i32 %x, %sel
+  %cmp = icmp eq i32 %sub, 0
+  ret i1 %cmp
+}
+
+; Poison / undef
+
+; Do not fold when select arms are poison.
+define i1 @icmp_add_select_poison(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_poison(
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[X:%.*]], 20
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 10
+  %sel = select i1 %cond, i32 poison, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
+
+; Do not fold when select arms are undef.
+define i1 @icmp_add_select_undef(i32 %x) {
+; CHECK-LABEL: @icmp_add_select_undef(
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[X:%.*]], 20
+; CHECK-NEXT:    ret i1 [[CMP]]
+;
+  %cond = icmp slt i32 %x, 10
+  %sel = select i1 %cond, i32 undef, i32 -20
+  %add = add i32 %sel, %x
+  %cmp = icmp eq i32 %add, 0
+  ret i1 %cmp
+}
