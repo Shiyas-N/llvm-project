@@ -1199,85 +1199,82 @@ Instruction *InstCombinerImpl::foldSignBitTest(ICmpInst &I) {
 }
 
 /// Handles:
-///   icmp eq/ne (add select((icmp slt/sgt/ult/ugt X, C1), C2, C3), X), 0
-///   icmp eq/ne (add X, select((icmp slt/sgt/ult/ugt X, C1), C2, C3)), 0
+///   icmp eq/ne (add select((icmp slt/sgt/ult/ugt X, CondC), TrueC, FalseC),
+///               X), 0
+///   icmp eq/ne (add X,
+///               select((icmp slt/sgt/ult/ugt X, CondC), TrueC,FalseC)), 0
 ///
-/// Fold into:
-///   eq : (X == -C2) || (X == -C3)
-///   ne : (X != -C2) && (X != -C3)
+/// Fold into (when roots are consistent with select arms):
+///   eq : (X == -TrueC) || (X == -FalseC)
+///   ne : (X != -TrueC) && (X != -FalseC)
 ///
 /// Caller guarantees: RHS of icmp is zero.
 static Instruction *foldICmpAddSelectZero(ICmpInst &Cmp, InstCombinerImpl &IC) {
-  
   CmpPredicate Pred = Cmp.getPredicate();
   if (!ICmpInst::isEquality(Pred))
     return nullptr;
-  Value *A;
-  const APInt *C1, *C2, *C3;
-  CmpPredicate P;
 
-  // Match:
-  // add (select (icmp X, C1), C2, C3), X
-  // or commuted form
+  Value *X;
+  const APInt *CondC, *TrueC, *FalseC;
+  CmpPredicate InnerPred;
+
+  // Match: add (select (icmp X, CondC), TrueC, FalseC), X — or commuted form.
+  // The outer OneUse guards the add (we're replacing it).
+  // The inner OneUse on the select is a profitability guard: this fold adds
+  // 3 instructions and removes 2, so it isn't profitable if the select is
+  // reused elsewhere.
   if (!match(Cmp.getOperand(0),
-             m_OneUse(m_c_Add(
-              m_OneUse(m_Select(
-                m_ICmp(P, m_Value(A), m_APInt(C1)), m_APInt(C2),
-                m_APInt(C3))),
-              m_Deferred(A)))))
-    return nullptr;  
+             m_OneUse(m_c_Add(m_OneUse(m_Select(
+                                  m_ICmp(InnerPred, m_Value(X), m_APInt(CondC)),
+                                  m_APInt(TrueC), m_APInt(FalseC))),
+                              m_Deferred(X)))))
+    return nullptr;
 
-  APInt LH = -(*C2);
-  APInt RH = -(*C3);
+  APInt TrueRoot = -(*TrueC);
+  APInt FalseRoot = -(*FalseC);
 
-  // Verify that LH and RH fall into the correct partition defined by C1.
-  // For slt: LH <s C1 <=s RH
-  // For sgt: LH >s C1 >=s RH
-  // For ult: LH <u C1 <=u RH
-  // For ugt: LH >u C1 >=u RH
-  // (sle/sge/ule/uge are canonicalized to slt/sgt/ult/ugt before reaching here)
-
-  switch (P) {
+  // The fold is valid only if each root matches the select arm that would
+  // produce it:
+  //   InnerPred(TrueRoot,  CondC) == true
+  //   InnerPred(FalseRoot, CondC) == false
+  //
+  // (sle/sge/ule/uge are canonicalized to slt/sgt/ult/ugt before reaching
+  // here.)
+  switch (InnerPred) {
   case ICmpInst::ICMP_SLT:
-    // LH < C1 <= RH
-    if (!LH.slt(*C1) || !C1->sle(RH))
+    if (!TrueRoot.slt(*CondC) || FalseRoot.slt(*CondC))
       return nullptr;
     break;
   case ICmpInst::ICMP_SGT:
-    // LH > C1 >= RH
-    if (!LH.sgt(*C1) || !C1->sge(RH))
+    if (!TrueRoot.sgt(*CondC) || FalseRoot.sgt(*CondC))
       return nullptr;
     break;
   case ICmpInst::ICMP_ULT:
-    // LH <u C1 <=u RH
-    if (!LH.ult(*C1) || !C1->ule(RH))
-        return nullptr;
+    if (!TrueRoot.ult(*CondC) || FalseRoot.ult(*CondC))
+      return nullptr;
     break;
   case ICmpInst::ICMP_UGT:
-    // LH >u C1 >=u RH
-    if (!LH.ugt(*C1) || !C1->uge(RH))
-        return nullptr;
+    if (!TrueRoot.ugt(*CondC) || FalseRoot.ugt(*CondC))
+      return nullptr;
     break;
   default:
     return nullptr;
   }
 
   InstCombiner::BuilderTy &Builder = IC.Builder;
-  Type *Ty = A->getType();
+  Type *Ty = X->getType();
+  Constant *TrueConst = ConstantInt::get(Ty, TrueRoot);
+  Constant *FalseConst = ConstantInt::get(Ty, FalseRoot);
 
-  // eq → (X == LH) || (X == RH)
-  // ne → (X != LH) && (X != RH)
-  if (Pred == ICmpInst::ICMP_EQ) {
-    Value *CmpA = Builder.CreateICmpEQ(A, ConstantInt::get(Ty, LH));
-    Value *CmpB = Builder.CreateICmpEQ(A, ConstantInt::get(Ty, RH));
-
-    return BinaryOperator::CreateOr(CmpA, CmpB);
-  }
-
-  Value *CmpA = Builder.CreateICmpNE(A, ConstantInt::get(Ty, LH));
-  Value *CmpB = Builder.CreateICmpNE(A, ConstantInt::get(Ty, RH));
-
-  return BinaryOperator::CreateAnd(CmpA, CmpB);
+  // eq -> (X == TrueRoot) || (X == FalseRoot)
+  // ne -> (X != TrueRoot) && (X != FalseRoot)
+  bool IsEq = Pred == ICmpInst::ICMP_EQ;
+  Value *CmpA = Builder.CreateICmp(IsEq ? CmpInst::ICMP_EQ : CmpInst::ICMP_NE,
+                                   X, TrueConst);
+  Value *CmpB = Builder.CreateICmp(IsEq ? CmpInst::ICMP_EQ : CmpInst::ICMP_NE,
+                                   X, FalseConst);
+  return IsEq ? BinaryOperator::CreateOr(CmpA, CmpB)
+              : BinaryOperator::CreateAnd(CmpA, CmpB);
 }
 
 // Handle  icmp pred X, 0
